@@ -62,7 +62,7 @@ export default function Dashboard() {
 
   const kpiCards = overviewStats
     ? [
-        { label: 'Total Conversations', value: overviewStats.totalConversations.toLocaleString(), change: overviewStats.totalConversationsGrowth, changeLabel: 'vs last month', icon: 'chat' },
+        { label: 'Total Conversations', value: (overviewStats.totalConversations || 0).toLocaleString(), change: overviewStats.totalConversationsGrowth, changeLabel: 'vs last month', icon: 'chat' },
         { label: 'Active Events',        value: overviewStats.activeEvents,                        change: overviewStats.activeEventsGrowth,        changeLabel: 'new this month', icon: 'event' },
         { label: 'Response Accuracy',    value: `${overviewStats.responseAccuracy}%`,              change: overviewStats.responseAccuracyGrowth,    changeLabel: 'vs last month', icon: 'accuracy' },
         { label: 'Avg Response Time',    value: `${overviewStats.avgResponseTime}s`,               change: overviewStats.avgResponseTimeGrowth,     changeLabel: 'vs last month', icon: 'speed' },
@@ -366,7 +366,7 @@ export default function Dashboard() {
                 <CardContent sx={{ p: 2 }}>
                   <Typography variant="subtitle1" sx={{ mb: 0.25, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Conversation Trend</Typography>
                   <Typography variant="caption" sx={{ mb: 1.5, display: 'block', color: 'text.secondary', fontSize: '0.75rem' }}>Daily chatbot conversations over the selected period</Typography>
-                  <ResponsiveContainer width="100%" height={280}>
+                  <ResponsiveContainer width="100%" height={280} minWidth={1} minHeight={1}>
                     <LineChart data={conversationStats}>
                       <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
                       <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} tickFormatter={(v) => new Date(v).toLocaleDateString('en', { month: 'short', day: 'numeric' })} />
@@ -389,7 +389,7 @@ export default function Dashboard() {
                     <Typography variant="caption" sx={{ mb: 1, display: 'block', color: 'text.secondary' }}>Conversations by language</Typography>
                   </Box>
                   <Box sx={{ flexGrow: 1, minHeight: 250, display: 'flex', alignItems: 'center' }}>
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                       <PieChart>
                         <Pie
                           data={languageStats}
@@ -439,7 +439,7 @@ export default function Dashboard() {
                 <CardContent sx={{ p: 2 }}>
                   <Typography variant="subtitle1" sx={{ mb: 0.25, fontWeight: 700, color: 'text.primary' }}>Top Query Categories</Typography>
                   <Typography variant="caption" sx={{ mb: 1.5, display: 'block', color: 'text.secondary' }}>What exhibitors ask most often</Typography>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width="100%" height={300} minWidth={1} minHeight={1}>
                     <BarChart data={topQueries.slice(0, 6)} layout="vertical" margin={{ left: 10 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke={gridColor} horizontal={true} vertical={false} />
                       <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: tickColor }} />
@@ -556,7 +556,7 @@ export default function Dashboard() {
                 <CardContent sx={{ p: 2 }}>
                   <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Exhibitor Adoption Funnel</Typography>
                   <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary', fontSize: '0.75rem' }}>From eligible exhibitors to repeat chatbot users</Typography>
-                  <ResponsiveContainer width="100%" height={260}>
+                  <ResponsiveContainer width="100%" height={260} minWidth={1} minHeight={1}>
                     <BarChart data={adoptionFunnel} layout="vertical" margin={{ left: 10 }}>
                       <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke={gridColor} />
                       <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} />
@@ -582,7 +582,7 @@ export default function Dashboard() {
                 <CardContent sx={{ p: 2 }}>
                   <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Adoption by Exhibitor Tier</Typography>
                   <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary', fontSize: '0.75rem' }}>Small, medium, premium and pavilion exhibitors</Typography>
-                  <ResponsiveContainer width="100%" height={260}>
+                  <ResponsiveContainer width="100%" height={260} minWidth={1} minHeight={1}>
                     <BarChart data={adoptionSegments} margin={{ left: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
                       <XAxis dataKey="segment" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} />
@@ -606,7 +606,7 @@ export default function Dashboard() {
                     <Typography variant="body2" sx={{ mb: 1.5, color: 'text.secondary', fontSize: '0.75rem' }}>How many exhibitors came back for multiple sessions</Typography>
                   </Box>
                   <Box sx={{ flexGrow: 1, minHeight: 220 }}>
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                       <PieChart>
                         <Pie
                           data={userRetention}
@@ -639,7 +639,7 @@ export default function Dashboard() {
                 <CardContent sx={{ p: 2 }}>
                   <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Adoption by Stand Type</Typography>
                   <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary', fontSize: '0.75rem' }}>Shell scheme, raw space, co-exhibitor, startup zone, etc.</Typography>
-                  <ResponsiveContainer width="100%" height={240}>
+                  <ResponsiveContainer width="100%" height={240} minWidth={1} minHeight={1}>
                     <BarChart data={standTypeAdoption} margin={{ left: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
                       <XAxis dataKey="type" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} angle={-25} textAnchor="end" height={50} />
@@ -728,7 +728,7 @@ export default function Dashboard() {
                 <CardContent sx={{ p: 3 }}>
                   <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 600, color: 'text.primary' }}>Conversations by Hour</Typography>
                   <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>When exhibitors interact with the chatbot</Typography>
-                  <ResponsiveContainer width="100%" height={280}>
+                  <ResponsiveContainer width="100%" height={280} minWidth={1} minHeight={1}>
                     <BarChart data={[
                       { time: "00-03", count: 84 }, { time: "03-06", count: 56 }, { time: "06-09", count: 298 },
                       { time: "09-12", count: 1012 }, { time: "12-15", count: 1144 }, { time: "15-18", count: 980 },
@@ -754,7 +754,7 @@ export default function Dashboard() {
                     <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>Where exhibitors start conversations</Typography>
                   </Box>
                   <Box sx={{ flexGrow: 1, minHeight: 250 }}>
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                       <PieChart>
                         <Pie
                           data={[
@@ -802,7 +802,7 @@ export default function Dashboard() {
                     <Typography variant="body2" sx={{ mb: 1.5, color: 'text.secondary', fontSize: '0.75rem' }}>Post-conversation feedback</Typography>
                   </Box>
                   <Box sx={{ flexGrow: 1, minHeight: 220 }}>
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                       <PieChart>
                         <Pie
                           data={feedbackSentiment}
@@ -833,7 +833,7 @@ export default function Dashboard() {
                 <CardContent sx={{ p: 2 }}>
                   <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Escalation Drivers</Typography>
                   <Typography variant="body2" sx={{ mb: 1.5, color: 'text.secondary', fontSize: '0.75rem' }}>Why users asked for a human</Typography>
-                  <ResponsiveContainer width="100%" height={240}>
+                  <ResponsiveContainer width="100%" height={240} minWidth={1} minHeight={1}>
                     <BarChart data={escalations} layout="vertical" margin={{ left: 10 }}>
                       <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke={gridColor} />
                       <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} />
@@ -926,7 +926,7 @@ export default function Dashboard() {
                   <Typography variant="caption" sx={{ mb: 2, display: 'block', color: 'text.disabled', fontStyle: 'italic', fontSize: '0.65rem' }}>
                     * Higher coverage means more questions answered; higher accuracy means fewer mistakes.
                   </Typography>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width="100%" height={300} minWidth={1} minHeight={1}>
                     <BarChart data={coverageTopics} layout="vertical" margin={{ left: 10, right: 20, bottom: 10 }}>
                       <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke={gridColor} />
                       <XAxis type="number" domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} />
@@ -1030,7 +1030,7 @@ export default function Dashboard() {
                 <CardContent sx={{ p: 2 }}>
                   <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Workload Impact by Department</Typography>
                   <Typography variant="body2" sx={{ mb: 1.5, color: 'text.secondary', fontSize: '0.75rem' }}>Estimated support hours saved by team</Typography>
-                  <ResponsiveContainer width="100%" height={260}>
+                  <ResponsiveContainer width="100%" height={260} minWidth={1} minHeight={1}>
                     <PieChart>
                       <Pie
                         data={opsImpact}

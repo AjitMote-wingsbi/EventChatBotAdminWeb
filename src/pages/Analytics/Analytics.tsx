@@ -84,7 +84,7 @@ export default function Analytics() {
           <Card sx={{ borderRadius: 1 }}>
             <CardContent sx={{ p: 1.5 }}>
               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 700, fontSize: '0.85rem' }}>Conversation Trends</Typography>
-              <ResponsiveContainer width="100%" height={240}>
+              <ResponsiveContainer width="100%" height={240} minWidth={1} minHeight={1}>
                 <LineChart data={conversationStats}>
                   <CartesianGrid strokeDasharray="3 3" stroke={alpha(tickColor, 0.15)} vertical={false} />
                   <XAxis dataKey="date" tick={{ fontSize: 10, fill: tickColor }} tickFormatter={(v) => new Date(v).toLocaleDateString('en', { month: 'short', day: 'numeric' })} />
