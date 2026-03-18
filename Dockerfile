@@ -17,14 +17,14 @@ FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Replace the default Nginx configuration to support SPA routing
-RUN echo 'server { \
-    listen 80; \
-    location / { \
-        root /usr/share/nginx/html; \
-        index index.html index.htm; \
-        try_files $$uri $$uri/ /index.html; \
-    } \
-}' > /etc/nginx/conf.d/default.conf
+RUN printf "server {\n\
+    listen 80;\n\
+    location / {\n\
+        root /usr/share/nginx/html;\n\
+        index index.html index.htm;\n\
+        try_files \$uri \$uri/ /index.html;\n\
+    }\n\
+}\n" > /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
