@@ -1,10 +1,10 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/';
 
 const api = axios.create({
-  baseURL: `${API_BASE_URL}api`,
+  baseURL: API_BASE_URL.endsWith('/') ? `${API_BASE_URL}api` : `${API_BASE_URL}/api`,
 });
 
 // Request interceptor — attach Bearer token from cookies
