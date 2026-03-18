@@ -18,11 +18,12 @@ import ThumbDownOutlinedIcon from '@mui/icons-material/ThumbDownOutlined';
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
 import {
-  recentConversations, sessionMetrics,
+  sessionMetrics,
   knowledgeSources, actionLog, unansweredGaps,
 } from '../../services/mockData';
 import {
   useGetOverviewStatsQuery,
+  useGetRecentConversationsQuery,
   useGetConversationStatsQuery,
   useGetLanguageStatsQuery,
   useGetTopQueriesQuery,
@@ -54,11 +55,12 @@ export default function Dashboard() {
   const cursorColor = isDarkMode ? alpha('#fff', 0.05) : alpha('#000', 0.05);
 
   const [tab, setTab] = useState(0);
+  const [period, setPeriod] = useState<'30d' | '7d' | '90d' | 'all'>('30d');
   const [exporting, setExporting] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
-  // Tab 0 — KPI cards (auto-fetch on page load)
-  const { data: overviewStats, isFetching: overviewFetching, refetch: refetchOverview } = useGetOverviewStatsQuery();
+  // Tab 0 — KPI cards (auto-fetch on page load, re-fetches when period changes)
+  const { data: overviewStats, isFetching: overviewFetching, refetch: refetchOverview } = useGetOverviewStatsQuery({ period });
 
   const kpiCards = overviewStats
     ? [
@@ -69,10 +71,11 @@ export default function Dashboard() {
       ]
     : [];
 
-  // Tab 0 — auto-fetch on page load
-  const { data: conversationStats = [], isFetching: convFetching, refetch: refetchConv }       = useGetConversationStatsQuery();
-  const { data: languageStats = [],     isFetching: langFetching, refetch: refetchLang }       = useGetLanguageStatsQuery();
-  const { data: topQueries = [],        isFetching: queriesFetching, refetch: refetchQueries } = useGetTopQueriesQuery();
+  // Tab 0 — auto-fetch on page load, re-fetches when period changes
+  const { data: recentConversations = [], isFetching: recentFetching, refetch: refetchRecent } = useGetRecentConversationsQuery({ period });
+  const { data: conversationStats = [], isFetching: convFetching, refetch: refetchConv }       = useGetConversationStatsQuery({ period });
+  const { data: languageStats = [],     isFetching: langFetching, refetch: refetchLang }       = useGetLanguageStatsQuery({ period });
+  const { data: topQueries = [],        isFetching: queriesFetching, refetch: refetchQueries } = useGetTopQueriesQuery({ period });
 
   // Tabs 1, 3, 4, 5 — lazy, triggered on tab switch
   const [triggerFunnel,      { data: adoptionFunnel = [],     isFetching: funnelFetching    }] = useLazyGetAdoptionFunnelQuery();
@@ -87,7 +90,7 @@ export default function Dashboard() {
 
   // Derive loading indicator for the visible tab
   const tabLoading =
-    tab === 0 ? overviewFetching || convFetching || langFetching || queriesFetching :
+    tab === 0 ? overviewFetching || recentFetching || convFetching || langFetching || queriesFetching :
     tab === 1 ? funnelFetching || segsFetching || standFetching || retentionFetching :
     tab === 3 ? sentimentFetching || escalFetching || intentFetching :
     tab === 4 ? coverageFetching :
@@ -127,6 +130,7 @@ export default function Dashboard() {
     switch (tab) {
       case 0:
         refetchOverview();
+        refetchRecent();
         refetchConv();
         refetchLang();
         refetchQueries();
@@ -151,7 +155,7 @@ export default function Dashboard() {
     }
     setSnackbar({ open: true, message: 'Dashboard data refreshed!', severity: 'success' });
   }, [
-    tab, refetchOverview, refetchConv, refetchLang, refetchQueries,
+    tab, refetchOverview, refetchRecent, refetchConv, refetchLang, refetchQueries,
     triggerFunnel, triggerSegments, triggerStandType, triggerRetention,
     triggerSentiment, triggerEscalations, triggerIntent,
     triggerCoverage, triggerOpsImpact,
@@ -226,20 +230,21 @@ export default function Dashboard() {
 
         <Box sx={{ display: 'flex', gap: 0.75, alignItems: 'center', flexWrap: 'wrap' }}>
           <FormControl size="small">
-            <Select 
-              defaultValue="30days" 
-              sx={{ 
-                bgcolor: 'background.paper', 
-                borderRadius: 1, 
-                minWidth: 120, 
+            <Select
+              value={period}
+              onChange={(e) => setPeriod(e.target.value as typeof period)}
+              sx={{
+                bgcolor: 'background.paper',
+                borderRadius: 1,
+                minWidth: 120,
                 fontSize: '0.75rem',
                 '& .MuiSelect-select': { py: 0.75, px: 1.5 }
               }}
             >
-              <MenuItem value="7days" sx={{ fontSize: '0.75rem' }}>Last 7 Days</MenuItem>
-              <MenuItem value="30days" sx={{ fontSize: '0.75rem' }}>Last 30 Days</MenuItem>
-              <MenuItem value="90days" sx={{ fontSize: '0.75rem' }}>Last 90 Days</MenuItem>
-              <MenuItem value="event" sx={{ fontSize: '0.75rem' }}>Event Cycle</MenuItem>
+              <MenuItem value="7d"  sx={{ fontSize: '0.75rem' }}>Last 7 Days</MenuItem>
+              <MenuItem value="30d" sx={{ fontSize: '0.75rem' }}>Last 30 Days</MenuItem>
+              <MenuItem value="90d" sx={{ fontSize: '0.75rem' }}>Last 90 Days</MenuItem>
+              <MenuItem value="all" sx={{ fontSize: '0.75rem' }}>Event Cycle</MenuItem>
             </Select>
           </FormControl>
           <FormControl size="small">

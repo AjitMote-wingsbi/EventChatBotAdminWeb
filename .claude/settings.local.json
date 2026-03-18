@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npm install:*)",
-      "Bash(del \"d:\\\\Ajit Mote Workspace\\\\WingsBi Workspace\\\\chatbotworkspace\\\\EventChatbot.Admin-main\\\\src\\\\services\\\\api.ts\")"
+      "Bash(del \"d:\\\\Ajit Mote Workspace\\\\WingsBi Workspace\\\\chatbotworkspace\\\\EventChatbot.Admin-main\\\\src\\\\services\\\\api.ts\")",
+      "Bash(npx tsc:*)"
     ]
   }
 }

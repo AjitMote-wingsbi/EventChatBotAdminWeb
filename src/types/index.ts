@@ -27,17 +27,19 @@ export interface User {
   createdAt: string;
 }
 
+export type Period = '7d' | '30d' | '90d' | 'all';
+
 export interface ConversationStat {
   date: string;
   conversations: number;
   messages: number;
-  uniqueUsers: number;
+  uniqueUsers: number | null;
 }
 
 export interface TopQuery {
   query: string;
   count: number;
-  category: string;
+  category: string | null;
 }
 
 export interface LanguageStat {
@@ -86,13 +88,13 @@ export interface RecentConversation {
 
 export interface OverviewStats {
   totalConversations: number;
-  totalConversationsGrowth: number;
   activeEvents: number;
-  activeEventsGrowth: number;
-  responseAccuracy: number;
-  responseAccuracyGrowth: number;
-  avgResponseTime: number;
-  avgResponseTimeGrowth: number;
+  totalConversationsGrowth: number | null;
+  activeEventsGrowth: number | null;
+  responseAccuracy: number | null;
+  responseAccuracyGrowth: number | null;
+  avgResponseTime: number | null;
+  avgResponseTimeGrowth: number | null;
 }
 
 export interface CoverageTopic {

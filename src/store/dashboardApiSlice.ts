@@ -1,29 +1,36 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import axiosBaseQuery from './axiosBaseQuery';
 import type {
-  ConversationStat, TopQuery, LanguageStat, CoverageTopic, OverviewStats,
+  ConversationStat, TopQuery, LanguageStat, CoverageTopic, OverviewStats, Period,
   AdoptionFunnelStage, AdoptionSegment, StandTypeAdoption, UserRetention,
-  FeedbackSentiment, Escalation, IntentOutcome, OpsImpact,
+  FeedbackSentiment, Escalation, IntentOutcome, OpsImpact, RecentConversation,
 } from '../types';
+
+type PeriodArg = { period?: Period };
 
 export const dashboardApiSlice = createApi({
   reducerPath: 'dashboardApi',
   baseQuery: axiosBaseQuery,
   endpoints: (builder) => ({
-    // Tab 0 — Overview KPI cards
-    getOverviewStats: builder.query<OverviewStats, void>({
-      query: () => ({ url: '/dashboard/overview-stats' }),
+    // Tab 0 — Overview KPI cards (period-aware)
+    getOverviewStats: builder.query<OverviewStats, PeriodArg>({
+      query: ({ period } = {}) => ({ url: '/dashboard/overview-stats', params: period ? { period } : undefined }),
     }),
 
-    // Tab 0 — Charts
-    getConversationStats: builder.query<ConversationStat[], void>({
-      query: () => ({ url: '/dashboard/conversation-stats' }),
+    // Tab 0 — Recent Conversations (period-aware)
+    getRecentConversations: builder.query<RecentConversation[], PeriodArg>({
+      query: ({ period } = {}) => ({ url: '/dashboard/recent-conversations', params: period ? { period } : undefined }),
     }),
-    getLanguageStats: builder.query<LanguageStat[], void>({
-      query: () => ({ url: '/dashboard/language-stats' }),
+
+    // Tab 0 — Charts (period-aware)
+    getConversationStats: builder.query<ConversationStat[], PeriodArg>({
+      query: ({ period } = {}) => ({ url: '/dashboard/conversation-stats', params: period ? { period } : undefined }),
     }),
-    getTopQueries: builder.query<TopQuery[], void>({
-      query: () => ({ url: '/dashboard/top-queries' }),
+    getLanguageStats: builder.query<LanguageStat[], PeriodArg>({
+      query: ({ period } = {}) => ({ url: '/dashboard/language-stats', params: period ? { period } : undefined }),
+    }),
+    getTopQueries: builder.query<TopQuery[], PeriodArg>({
+      query: ({ period } = {}) => ({ url: '/dashboard/top-queries', params: period ? { period } : undefined }),
     }),
 
     // Tab 1 — Adoption
@@ -66,6 +73,7 @@ export const dashboardApiSlice = createApi({
 export const {
   // Auto-fetch on mount (Tab 0 — Overview)
   useGetOverviewStatsQuery,
+  useGetRecentConversationsQuery,
   useGetConversationStatsQuery,
   useGetLanguageStatsQuery,
   useGetTopQueriesQuery,
