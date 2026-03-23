@@ -12,7 +12,8 @@ import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import { useNavigate } from 'react-router-dom';
-const events: any[] = [];
+import type { Event } from '../../types';
+import { staticEvents } from '../../data/staticEvents';
 
 const statusColors: Record<string, { bg: string; text: string }> = {
   active: { bg: 'rgba(16,185,129,0.1)', text: '#059669' },
@@ -21,10 +22,14 @@ const statusColors: Record<string, { bg: string; text: string }> = {
   archived: { bg: 'rgba(100,116,139,0.1)', text: '#64748b' },
 };
 
+const emptyForm = { name: '', description: '', venue: '', startDate: '', endDate: '' };
+
 export default function EventsList() {
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [form, setForm] = useState(emptyForm);
+  const [events, setEvents] = useState<Event[]>(staticEvents);
   const navigate = useNavigate();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
@@ -33,6 +38,37 @@ export default function EventsList() {
     e.name.toLowerCase().includes(search.toLowerCase()) ||
     e.venue.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleFieldChange = (field: keyof typeof emptyForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm(prev => ({ ...prev, [field]: e.target.value }));
+  };
+
+  const handleCreate = () => {
+    if (!form.name.trim() || !form.venue.trim() || !form.startDate || !form.endDate) return;
+    const newEvent: Event = {
+      id: Date.now().toString(),
+      name: form.name,
+      description: form.description,
+      venue: form.venue,
+      startDate: form.startDate,
+      endDate: form.endDate,
+      status: 'draft',
+      languages: [],
+      totalConversations: 0,
+      totalExhibitors: 0,
+      primaryColor: '#6366f1',
+      welcomeMessage: '',
+      createdAt: new Date().toISOString(),
+    };
+    setEvents(prev => [newEvent, ...prev]);
+    setDialogOpen(false);
+    setForm(emptyForm);
+  };
+
+  const handleClose = () => {
+    setDialogOpen(false);
+    setForm(emptyForm);
+  };
 
   return (
     <Box>
@@ -68,10 +104,10 @@ export default function EventsList() {
             {filtered.map((event) => (
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={event.id}>
                 <Card
-                  sx={{ 
+                  sx={{
                     borderRadius: 1, cursor: 'pointer', transition: 'all 0.2s',
                     boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
-                    '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' } 
+                    '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }
                   }}
                   onClick={() => navigate(`/events/${event.id}`)}
                 >
@@ -95,16 +131,16 @@ export default function EventsList() {
                     <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary', fontSize: '0.85rem', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                       {event.description}
                     </Typography>
-  
+
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 2.5 }}>
                       <CalendarMonthOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
                       <Typography variant="body2" sx={{ fontSize: '0.75rem', color: 'text.secondary', fontWeight: 500 }}>
                         {event.startDate ? new Date(event.startDate).toLocaleDateString('en', { month: 'short', day: 'numeric' }) : ''} – {event.endDate ? new Date(event.endDate).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
                       </Typography>
                     </Box>
-  
+
                     <Divider sx={{ mb: 2, borderColor: '#f1f5f9' }} />
-  
+
                     <Box sx={{ display: 'flex', gap: 3 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                         <ChatOutlinedIcon sx={{ fontSize: 16, color: 'primary.main' }} />
@@ -130,13 +166,13 @@ export default function EventsList() {
           <Box sx={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                  <tr style={{ textAlign: 'left', borderBottom: '1px solid', borderColor: alpha('#94a3b8', 0.1) }}>
-                    <th style={{ padding: '16px 24px', color: isDark ? '#cbd5e1' : '#64748b', fontWeight: 600, fontSize: '0.85rem' }}>Event Name</th>
-                    <th style={{ padding: '16px 24px', color: isDark ? '#cbd5e1' : '#64748b', fontWeight: 600, fontSize: '0.85rem' }}>Dates</th>
-                    <th style={{ padding: '16px 24px', color: isDark ? '#cbd5e1' : '#64748b', fontWeight: 600, fontSize: '0.85rem' }}>Venue</th>
-                    <th style={{ padding: '16px 24px', color: isDark ? '#cbd5e1' : '#64748b', fontWeight: 600, fontSize: '0.85rem' }}>Conversations</th>
-                    <th style={{ padding: '16px 24px', color: isDark ? '#cbd5e1' : '#64748b', fontWeight: 600, fontSize: '0.85rem' }}>Status</th>
-                  </tr>
+                <tr style={{ textAlign: 'left', borderBottom: '1px solid', borderColor: alpha('#94a3b8', 0.1) }}>
+                  <th style={{ padding: '16px 24px', color: isDark ? '#cbd5e1' : '#64748b', fontWeight: 600, fontSize: '0.85rem' }}>Event Name</th>
+                  <th style={{ padding: '16px 24px', color: isDark ? '#cbd5e1' : '#64748b', fontWeight: 600, fontSize: '0.85rem' }}>Dates</th>
+                  <th style={{ padding: '16px 24px', color: isDark ? '#cbd5e1' : '#64748b', fontWeight: 600, fontSize: '0.85rem' }}>Venue</th>
+                  <th style={{ padding: '16px 24px', color: isDark ? '#cbd5e1' : '#64748b', fontWeight: 600, fontSize: '0.85rem' }}>Conversations</th>
+                  <th style={{ padding: '16px 24px', color: isDark ? '#cbd5e1' : '#64748b', fontWeight: 600, fontSize: '0.85rem' }}>Status</th>
+                </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
@@ -147,7 +183,7 @@ export default function EventsList() {
                   </tr>
                 ) : (
                   filtered.map((event) => (
-                    <tr 
+                    <tr
                       key={event.id}
                       onClick={() => navigate(`/events/${event.id}`)}
                       style={{ borderBottom: '1px solid #f8fafc', cursor: 'pointer' }}
@@ -190,20 +226,20 @@ export default function EventsList() {
       )}
 
       {/* Create Event Dialog */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+      <Dialog open={dialogOpen} onClose={handleClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
         <DialogTitle sx={{ fontWeight: 700 }}>Create New Event</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '16px !important' }}>
-          <TextField label="Event Name" fullWidth size="small" />
-          <TextField label="Description" fullWidth size="small" multiline rows={2} />
-          <TextField label="Venue" fullWidth size="small" />
+          <TextField label="Event Name" fullWidth size="small" value={form.name} onChange={handleFieldChange('name')} />
+          <TextField label="Description" fullWidth size="small" multiline rows={2} value={form.description} onChange={handleFieldChange('description')} />
+          <TextField label="Venue" fullWidth size="small" value={form.venue} onChange={handleFieldChange('venue')} />
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField label="Start Date" type="date" fullWidth size="small" InputLabelProps={{ shrink: true }} />
-            <TextField label="End Date" type="date" fullWidth size="small" InputLabelProps={{ shrink: true }} />
+            <TextField label="Start Date" type="date" fullWidth size="small" InputLabelProps={{ shrink: true }} value={form.startDate} onChange={handleFieldChange('startDate')} />
+            <TextField label="End Date" type="date" fullWidth size="small" InputLabelProps={{ shrink: true }} value={form.endDate} onChange={handleFieldChange('endDate')} />
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button onClick={() => setDialogOpen(false)} color="inherit" size="small">Cancel</Button>
-          <Button variant="contained" size="small" onClick={() => setDialogOpen(false)}>Create Event</Button>
+          <Button onClick={handleClose} color="inherit" size="small">Cancel</Button>
+          <Button variant="contained" size="small" onClick={handleCreate}>Create Event</Button>
         </DialogActions>
       </Dialog>
     </Box>

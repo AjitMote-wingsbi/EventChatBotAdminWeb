@@ -9,8 +9,8 @@ import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import CodeRoundedIcon from '@mui/icons-material/CodeRounded';
-const events: any[] = [];
 import ChatbotPreview from '../../components/common/ChatbotPreview';
+import { staticEvents } from '../../data/staticEvents';
 
 const LANGUAGES = [
   { code: 'en', name: 'English' }, { code: 'hi', name: 'Hindi' },
@@ -23,7 +23,7 @@ export default function EventDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [tab, setTab] = useState(0);
-  const event = events.find((e) => e.id === id);
+  const event = staticEvents.find((e) => e.id === id);
 
   // Live config state for preview
   const [botName, setBotName] = useState(event ? 'XpoAssist' : 'Bot');
