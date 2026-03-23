@@ -359,11 +359,71 @@ export default function Dashboard() {
             ))}
           </Grid>
 
+          {/* Conversation Trend + Language Pie */}
+          <Grid container spacing={1.5}>
+            {/* Conversation Trend Line Chart */}
+            <Grid size={{ xs: 12, md: 8 }} sx={{ display: 'flex' }}>
+              <Box sx={{ width: '100%', height: '100%' }}>
+                <ChartWrapper key={`convtrend-${period}`} title="Conversation Trend" subtitle="Daily chatbot conversations over the selected period" data={conversationStats}>
+                  <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
+                    <LineChart data={conversationStats.map((d: any) => ({ ...d, conversations: Number(d.conversations || 0), uniqueUsers: Number(d.uniqueUsers || 0) }))}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+                      <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} tickFormatter={(v) => new Date(v).toLocaleDateString('en', { month: 'short', day: 'numeric' })} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} />
+                      <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', backgroundColor: theme.palette.background.paper, color: theme.palette.text.primary }} />
+                      <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ fontSize: '0.65rem', fontWeight: 500, paddingTop: '2px' }} />
+                      <Line type="monotone" name="Conversations" dataKey="conversations" stroke="#6366f1" strokeWidth={2.5} dot={{ r: 3, strokeWidth: 2, fill: theme.palette.background.paper }} activeDot={{ r: 5, strokeWidth: 0 }} />
+                      <Line type="monotone" name="Unique Users" dataKey="uniqueUsers" stroke="#10b981" strokeWidth={2} dot={false} strokeDasharray="5 5" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </ChartWrapper>
+              </Box>
+            </Grid>
+
+            {/* Language Usage Pie */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Box sx={{ width: '100%', height: '100%' }}>
+                <ChartWrapper key={`lang-${period}`} title="Language Usage" subtitle="Conversations by language" data={languageStats}>
+                  {(isFull) => (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                      <Box sx={{ flexGrow: 1, minHeight: 180, position: 'relative' }}>
+                        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+                          <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={languageStats.map((d: any) => ({ ...d, percentage: Number(d.percentage || 0), legendName: `${d.language}: ${Number(d.percentage || 0)}%` }))}
+                                cx="50%" cy={isFull ? '50%' : '40%'}
+                                innerRadius={isFull ? 150 : '35%'} outerRadius={isFull ? 250 : '55%'}
+                                paddingAngle={1} dataKey="percentage"
+                                nameKey="legendName"
+                                stroke="none"
+                                label={{ fontSize: 10, fontWeight: 500 }}
+                              >
+                                {languageStats.map((_, i) => (
+                                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                                ))}
+                              </Pie>
+                              <Tooltip
+                                formatter={(value: any, name: any) => [`${value}%`, name.split(':')[0]]}
+                                contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', backgroundColor: theme.palette.background.paper, color: theme.palette.text.primary }}
+                              />
+                              <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ fontSize: '0.65rem', fontWeight: 500, paddingTop: '2px' }} />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </Box>
+                      </Box>
+                    </Box>
+                  )}
+                </ChartWrapper>
+              </Box>
+            </Grid>
+          </Grid>
+
           <Grid container spacing={1.5}>
             {/* Top Queries */}
-            <Grid size={{ xs: 12, md: 7 }}>
+            <Grid size={{ xs: 12, md: 5 }} sx={{ display: 'flex' }}>
               <Box sx={{ width: '100%', height: '100%' }}>
-                <ChartWrapper title="Top Query Categories" subtitle="What exhibitors ask most often" data={topQueries}>
+                <ChartWrapper key={`queries-${period}`} title="Top Query Categories" subtitle="What exhibitors ask most often" data={topQueries}>
                   <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
                     <BarChart data={topQueries.slice(0, 6).map((d: any) => ({ ...d, count: Number(d.count || 0) }))} layout="vertical" margin={{ left: 10 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke={gridColor} horizontal={true} vertical={false} />
@@ -379,45 +439,101 @@ export default function Dashboard() {
               </Box>
             </Grid>
 
-            {/* Language Usage */}
-            <Grid size={{ xs: 12, md: 5 }}>
+            {/* Recent Conversations — right side of Top Queries in Overview */}
+            <Grid size={{ xs: 12, md: 7 }} sx={{ display: 'flex' }}>
               <Box sx={{ width: '100%', height: '100%' }}>
-                <ChartWrapper title="Language Usage" subtitle="Conversations by language" data={languageStats}>
-                  {(isFull) => (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                      <Box sx={{ flexGrow: 1, minHeight: 180, position: 'relative' }}>
-                        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-                          <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
-                            <PieChart>
-                              <Pie
-                                data={languageStats.map((d: any) => ({ ...d, percentage: Number(d.percentage || 0), legendName: `${d.language}: ${Number(d.percentage || 0)}%` }))}
-                                cx="50%" cy={isFull ? "50%" : "40%"}
-                                innerRadius={isFull ? 150 : "35%"} outerRadius={isFull ? 250 : "55%"}
-                                paddingAngle={1} dataKey="percentage"
-                                nameKey="legendName"
-                                stroke="none"
-                                label={{ fontSize: 10, fontWeight: 500 }}
-                              >
-                                {languageStats.map((_, i) => (
-                                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                                ))}
-                              </Pie>
-                              <Tooltip
-                                formatter={(value: any, name: any) => [`${value}%`, name.split(':')[0]]}
-                                contentStyle={{
-                                  borderRadius: 12, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
-                                  backgroundColor: theme.palette.background.paper, color: theme.palette.text.primary
-                                }}
-                              />
-                              <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ fontSize: '0.65rem', fontWeight: 500, paddingTop: '2px' }} />
-                            </PieChart>
-                          </ResponsiveContainer>
-                        </Box>
-                      </Box>
-                    </Box>
-                  )}
+                <ChartWrapper title="Recent Conversations" subtitle="Latest interactions with the chatbot" data={recentConversations} disableEmptyState={true}>
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow sx={{ '& th': { borderBottom: '1px solid', borderColor: 'divider', color: 'text.secondary', fontWeight: 600, px: 1, py: 1.5 } }}>
+                          <TableCell>User</TableCell>
+                          <TableCell>Query</TableCell>
+                          <TableCell>Language</TableCell>
+                          <TableCell align="center">Rating</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {recentConversations.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={4} align="center" sx={{ py: 6 }}>
+                              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>No Data Found</Typography>
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          recentConversations.map((conv) => (
+                            <TableRow key={conv.id} hover sx={{ '& td': { borderBottom: '1px solid', borderColor: alpha('#fff', 0.05), px: 1, py: 1.5 } }}>
+                              <TableCell>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                  <Avatar sx={{ width: 30, height: 30, bgcolor: alpha('#6366f1', 0.1), color: '#6366f1', fontSize: '0.65rem', fontWeight: 600 }}>
+                                    {conv.user?.split('#')[1]?.slice(-2) || 'U'}
+                                  </Avatar>
+                                  <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'text.primary', fontWeight: 500 }}>{conv.user}</Typography>
+                                </Box>
+                              </TableCell>
+                              <TableCell>
+                                <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'text.secondary', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {conv.query}
+                                </Typography>
+                              </TableCell>
+                              <TableCell>
+                                <Chip label={conv.language} size="small" sx={{ fontSize: '0.7rem', height: 20, bgcolor: (t) => t.palette.mode === 'dark' ? alpha('#fff', 0.1) : '#f1f5f9', color: 'text.secondary', fontWeight: 500, borderRadius: 1 }} />
+                              </TableCell>
+                              <TableCell align="center">
+                                {conv.satisfied === true && <ThumbUpOutlinedIcon sx={{ fontSize: 16, color: '#10b981' }} />}
+                                {conv.satisfied === false && <ThumbDownOutlinedIcon sx={{ fontSize: 16, color: '#ef4444' }} />}
+                                {conv.satisfied === null && <Typography variant="body2" sx={{ fontSize: '0.65rem', color: 'text.disabled' }}>—</Typography>}
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
                 </ChartWrapper>
               </Box>
+            </Grid>
+          </Grid>
+
+          {/* Executive Summary + Priority Actions */}
+          <Grid container spacing={1.5}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                <CardContent sx={{ p: 1.5 }}>
+                  <Typography variant="subtitle1" sx={{ mb: 0.25, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Executive Summary</Typography>
+                  <Typography variant="caption" sx={{ mb: 1.5, display: 'block', color: 'text.secondary', fontSize: '0.75rem' }}>Organizer-level interpretation</Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+                    {[
+                      { title: 'Strong Adoption', text: '70.6% of eligible exhibitors used the bot, with high engagement from premium tiers.' },
+                      { title: 'Standard Load Deflection', text: '67.5% deflection shows the bot successfully handles routine forms/deadlines.' },
+                    ].map((item, i) => (
+                      <Box key={i} sx={{ borderLeft: '3px solid #6366f1', pl: 1.5, py: 0.25 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary', fontSize: '0.75rem' }}>{item.title}</Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem', lineHeight: 1.4 }}>{item.text}</Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                <CardContent sx={{ p: 1.5 }}>
+                  <Typography variant="subtitle1" sx={{ mb: 0.25, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Priority Actions</Typography>
+                  <Typography variant="caption" sx={{ mb: 1.5, display: 'block', color: 'text.secondary', fontSize: '0.75rem' }}>Steps for operations team</Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+                    {[
+                      { title: 'Exception Handling', text: 'Create content for late approvals and sector-specific logistics.' },
+                      { title: 'Logistics Richness', text: 'Enrich move-in/out answers with step-by-step contractor rules.' },
+                    ].map((item, i) => (
+                      <Box key={i} sx={{ borderLeft: '3px solid #fbbf24', pl: 1.5, py: 0.25 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary', fontSize: '0.75rem' }}>{item.title}</Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem', lineHeight: 1.4 }}>{item.text}</Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </CardContent>
+              </Card>
             </Grid>
           </Grid>
         </>
@@ -536,82 +652,85 @@ export default function Dashboard() {
       {/* Tab: Conversations */}
       {tab === 2 && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          {/* Session Metrics mini-KPIs */}
           <Grid container spacing={1.5}>
-            {/* Conversation Trend */}
-            <Grid size={{ xs: 12, md: 12 }} sx={{ display: 'flex' }}>
+            {[
+              { label: 'Avg. Session Duration', value: '4m 12s' },
+              { label: 'Avg. Messages / Session', value: '4.2' },
+              { label: 'Bounce Rate (1-msg)', value: '18.4%' },
+              { label: 'Escalation Rate', value: '3.1%' },
+              { label: 'Unanswered Queries', value: '284' },
+            ].map((item, i) => (
+              <Grid size={{ xs: 6, sm: 4, md: 2.4 }} key={i}>
+                <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', height: '100%' }}>
+                  <CardContent sx={{ p: 1.5 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 700, mb: 0.5, fontSize: '0.7rem', minHeight: 32 }}>{item.label}</Typography>
+                    <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', fontSize: '1.1rem' }}>{item.value}</Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+
+          <Grid container spacing={1.5}>
+            {/* Conversations by Hour */}
+            <Grid size={{ xs: 12, md: 7 }} sx={{ display: 'flex' }}>
               <Box sx={{ width: '100%', height: '100%' }}>
-                <ChartWrapper title="Conversation Trend" subtitle="Daily chatbot conversations over the selected period" data={conversationStats}>
+                <ChartWrapper title="Conversations by Hour" subtitle="When exhibitors interact with the chatbot" data={[{}]}>
                   <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
-                    <LineChart data={conversationStats.map((d: any) => ({ ...d, conversations: Number(d.conversations || 0), uniqueUsers: Number(d.uniqueUsers || 0) }))}>
-                      <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
-                      <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} tickFormatter={(v) => new Date(v).toLocaleDateString('en', { month: 'short', day: 'numeric' })} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} />
-                      <Tooltip
-                        contentStyle={{
-                          borderRadius: 8, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
-                          backgroundColor: theme.palette.background.paper, color: theme.palette.text.primary
-                        }}
-                      />
-                      <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ fontSize: '0.65rem', fontWeight: 500, paddingTop: '2px' }} />
-                      <Line type="monotone" name="Conversations" dataKey="conversations" stroke="#6366f1" strokeWidth={3} dot={{ r: 4, fill: '#6366f1', strokeWidth: 0 }} activeDot={{ r: 6 }} />
-                      <Line type="monotone" name="Unique Users" dataKey="uniqueUsers" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981', strokeWidth: 0 }} />
-                    </LineChart>
+                    <BarChart data={[
+                      { time: '00-03', count: 84 }, { time: '03-06', count: 56 }, { time: '06-09', count: 298 },
+                      { time: '09-12', count: 1012 }, { time: '12-15', count: 1144 }, { time: '15-18', count: 980 },
+                      { time: '18-21', count: 468 }, { time: '21-24', count: 244 },
+                    ]} margin={{ left: -10 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
+                      <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: tickColor }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: tickColor }} />
+                      <Tooltip cursor={{ fill: cursorColor }} contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                      <Bar dataKey="count" name="Conversations" fill="#fbbf24" radius={[4, 4, 0, 0]} barSize={40} />
+                    </BarChart>
                   </ResponsiveContainer>
                 </ChartWrapper>
               </Box>
             </Grid>
 
-            {/* Recent Conversations */}
-            <Grid size={{ xs: 12, md: 12 }} sx={{ display: 'flex' }}>
+            {/* Source Entry Points */}
+            <Grid size={{ xs: 12, md: 5 }} sx={{ display: 'flex' }}>
               <Box sx={{ width: '100%', height: '100%' }}>
-                <ChartWrapper title="Recent Conversations" subtitle="Latest interactions with the chatbot" data={recentConversations} disableEmptyState={true}>
-                  <TableContainer>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow sx={{ '& th': { borderBottom: '1px solid', borderColor: 'divider', color: 'text.secondary', fontWeight: 600, px: 1, py: 1.5 } }}>
-                          <TableCell>User</TableCell>
-                          <TableCell>Query</TableCell>
-                          <TableCell>Language</TableCell>
-                          <TableCell align="center">Rating</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {recentConversations.length === 0 ? (
-                          <TableRow>
-                            <TableCell colSpan={4} align="center" sx={{ py: 6 }}>
-                              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>No Data Found</Typography>
-                            </TableCell>
-                          </TableRow>
-                        ) : (
-                          recentConversations.map((conv) => (
-                            <TableRow key={conv.id} hover sx={{ '& td': { borderBottom: '1px solid', borderColor: alpha('#fff', 0.05), px: 1, py: 1.5 } }}>
-                              <TableCell>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                  <Avatar sx={{ width: 30, height: 30, bgcolor: alpha('#6366f1', 0.1), color: '#6366f1', fontSize: '0.65rem', fontWeight: 600 }}>
-                                    {conv.user?.split('#')[1]?.slice(-2) || 'U'}
-                                  </Avatar>
-                                  <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'text.primary', fontWeight: 500 }}>{conv.user}</Typography>
-                                </Box>
-                              </TableCell>
-                              <TableCell>
-                                <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'text.secondary', maxWidth: 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                  {conv.query}
-                                </Typography>
-                              </TableCell>
-                              <TableCell>
-                                <Chip label={conv.language} size="small" sx={{ fontSize: '0.7rem', height: 20, bgcolor: (t) => t.palette.mode === 'dark' ? alpha('#fff', 0.1) : '#f1f5f9', color: 'text.secondary', fontWeight: 500, borderRadius: 1 }} />
-                              </TableCell>
-                              <TableCell align="center">
-                                {conv.satisfied === true && <ThumbUpOutlinedIcon sx={{ fontSize: 16, color: '#10b981' }} />}
-                                {conv.satisfied === false && <ThumbDownOutlinedIcon sx={{ fontSize: 16, color: '#ef4444' }} />}
-                                {conv.satisfied === null && <Typography variant="body2" sx={{ fontSize: '0.65rem', color: 'text.disabled' }}>—</Typography>}
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        )}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
+                <ChartWrapper title="Source Entry Points" subtitle="Where exhibitors start conversations" data={[{}]}>
+                  {(isFull) => (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                      <Box sx={{ flexGrow: 1, minHeight: 180, position: 'relative' }}>
+                        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+                          <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={[
+                                  { source: 'Dashboard Widget', users: 1462 },
+                                  { source: 'Order Forms Page', users: 1038 },
+                                  { source: 'Profile Wizard', users: 676 },
+                                  { source: 'Deadline Calendar', users: 481 },
+                                  { source: 'FAQ / Help Center', users: 402 },
+                                  { source: 'Badging Module', users: 227 },
+                                ]}
+                                cx="50%" cy={isFull ? '50%' : '40%'}
+                                innerRadius={isFull ? 150 : '35%'} outerRadius={isFull ? 250 : '55%'}
+                                paddingAngle={2} dataKey="users" nameKey="source"
+                                stroke="none"
+                                label={{ fontSize: 10, fontWeight: 500 }}
+                              >
+                                {['#6366f1', '#22c55e', '#fbbf24', '#60a5fa', '#ec4899', '#f97316'].map((color, index) => (
+                                  <Cell key={`cell-${index}`} fill={color} />
+                                ))}
+                              </Pie>
+                              <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                              <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ fontSize: '0.65rem', fontWeight: 500, paddingTop: '2px' }} />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </Box>
+                      </Box>
+                    </Box>
+                  )}
                 </ChartWrapper>
               </Box>
             </Grid>
@@ -682,14 +801,13 @@ export default function Dashboard() {
             </Grid>
           </Grid>
 
-          {/* Intent Outcomes */}
+          {/* Intent Outcomes + Knowledge Gaps */}
           <Grid container spacing={1.5}>
-            {/* Intent Outcomes */}
-            <Grid size={{ xs: 12, md: 12 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Box sx={{ width: '100%', height: '100%' }}>
                 <ChartWrapper title="Intent Outcomes" subtitle="Resolution rates by topic" data={intentOutcome} disableEmptyState={true}>
-                  <TableContainer>
-                    <Table size="small">
+                  <TableContainer sx={{ maxHeight: 350, overflow: 'auto' }}>
+                    <Table size="small" stickyHeader>
                       <TableHead sx={{ bgcolor: (t) => t.palette.mode === 'dark' ? alpha('#fff', 0.05) : '#f8fafc' }}>
                         <TableRow>
                           <TableCell sx={{ py: 1, fontWeight: 700, fontSize: '0.7rem' }}>Intent</TableCell>
@@ -722,6 +840,33 @@ export default function Dashboard() {
                   </TableContainer>
                 </ChartWrapper>
               </Box>
+            </Grid>
+
+            {/* Top Knowledge Gaps */}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', height: '100%' }}>
+                <CardContent sx={{ p: 0 }}>
+                  <Box sx={{ p: 2, pb: 1.5 }}>
+                    <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Top Knowledge Gaps</Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>Questions the bot couldn't answer</Typography>
+                  </Box>
+                  <Box sx={{ p: 2, pt: 0, display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+                    {[
+                      { q: 'What are the exact electricity socket types available in my stand?', gap: 'Technical specs missing', count: 87 },
+                      { q: 'Can I cancel my approved order within 48 hours?', gap: 'Policy gap', count: 64 },
+                      { q: 'How do I register multiple team members for exhibitor badges?', gap: 'Registration flow unclear', count: 51 },
+                    ].map((gap, i) => (
+                      <Box key={i} sx={{ p: 1.5, borderRadius: 1.5, bgcolor: (t) => t.palette.mode === 'dark' ? alpha(t.palette.error.main, 0.1) : alpha('#ef4444', 0.05), border: '1px solid', borderColor: 'divider' }}>
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary', mb: 0.5, fontSize: '0.75rem' }}>"{gap.q}"</Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="caption" sx={{ color: 'error.main', fontWeight: 700, fontSize: '0.65rem' }}>Gap: {gap.gap}</Typography>
+                          <Chip label={`${gap.count} times`} size="small" sx={{ height: 18, fontSize: '0.6rem', bgcolor: 'error.main', color: '#fff', fontWeight: 700, borderRadius: 1 }} />
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
+                </CardContent>
+              </Card>
             </Grid>
           </Grid>
         </Box>
@@ -760,7 +905,82 @@ export default function Dashboard() {
                 </ChartWrapper>
               </Box>
             </Grid>
+
+            {/* Knowledge Sources Table */}
+            <Grid size={{ xs: 12, md: 7 }}>
+              <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', height: '100%' }}>
+                <CardContent sx={{ p: 0 }}>
+                  <Box sx={{ p: 2, pb: 1.5 }}>
+                    <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Knowledge Sources</Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>Documents driving the chatbot's answers</Typography>
+                  </Box>
+                  <TableContainer sx={{ maxHeight: 350, overflow: 'auto' }}>
+                    <Table size="small" stickyHeader>
+                      <TableHead sx={{ bgcolor: (t) => t.palette.mode === 'dark' ? alpha('#fff', 0.05) : '#f8fafc' }}>
+                        <TableRow>
+                          <TableCell sx={{ py: 1, fontWeight: 700, fontSize: '0.7rem' }}>Source Document</TableCell>
+                          <TableCell sx={{ py: 1, fontWeight: 700, fontSize: '0.7rem' }}>Answers</TableCell>
+                          <TableCell sx={{ py: 1, fontWeight: 700, fontSize: '0.7rem' }}>Coverage</TableCell>
+                          <TableCell sx={{ py: 1, fontWeight: 700, fontSize: '0.7rem' }}>Updated</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {[
+                          { source: 'Exhibitor Services Manual v3.2', answered: 2841, coverage: 87, updated: '2026-03-01' },
+                          { source: 'Stand Construction Guidelines', answered: 1204, coverage: 72, updated: '2026-02-18' },
+                          { source: 'Move-In / Move-Out Schedule', answered: 984, coverage: 65, updated: '2026-02-22' },
+                          { source: 'Badging & Passes FAQ', answered: 761, coverage: 91, updated: '2026-03-05' },
+                          { source: 'Catering & Hospitality Rules', answered: 542, coverage: 58, updated: '2026-01-30' },
+                        ].map((row) => (
+                          <TableRow key={row.source} hover sx={{ '& td': { borderColor: 'divider', py: 1 } }}>
+                            <TableCell>
+                              <Typography variant="body2" sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600, fontSize: '0.75rem' }}>{row.source}</Typography>
+                            </TableCell>
+                            <TableCell sx={{ fontSize: '0.75rem' }}>{row.answered}</TableCell>
+                            <TableCell>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Box sx={{ width: '100%', maxWidth: 50, height: 5, borderRadius: 2.5, bgcolor: alpha('#3b82f6', 0.15) }}>
+                                  <Box sx={{ width: `${row.coverage}%`, height: '100%', borderRadius: 2.5, bgcolor: '#3b82f6' }} />
+                                </Box>
+                                <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', fontSize: '0.65rem' }}>{row.coverage}%</Typography>
+                              </Box>
+                            </TableCell>
+                            <TableCell sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>{row.updated}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
+
+          {/* Knowledge Action Log */}
+          <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+            <CardContent sx={{ p: 0 }}>
+              <Box sx={{ p: 2, pb: 1.5 }}>
+                <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Knowledge Action Log</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>Recent team actions to improve the bot</Typography>
+              </Box>
+              <Box sx={{ p: 2, pt: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {[
+                  { title: 'Added stand electricity socket specifications', meta: 'Technical Services — 2026-03-10' },
+                  { title: 'Updated cancellation policy to include 48-hour window', meta: 'Operations Team — 2026-03-08' },
+                  { title: 'Expanded badge registration multi-user flow', meta: 'Badging Module — 2026-03-06' },
+                  { title: 'Added Arabic translations for move-in schedule', meta: 'Localization — 2026-03-04' },
+                ].map((item, i) => (
+                  <Box key={i} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 1.5, borderRadius: 1.5, bgcolor: (t) => t.palette.mode === 'dark' ? alpha('#fff', 0.03) : '#f8fafc', border: '1px solid', borderColor: 'divider' }}>
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary', fontSize: '0.75rem' }}>{item.title}</Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.25, display: 'block', fontSize: '0.65rem' }}>{item.meta}</Typography>
+                    </Box>
+                    <Chip label="Actioned" size="small" sx={{ height: 20, fontSize: '0.65rem', bgcolor: alpha('#10b981', 0.1), color: '#10b981', fontWeight: 700, borderRadius: 1 }} />
+                  </Box>
+                ))}
+              </Box>
+            </CardContent>
+          </Card>
         </Box>
       )}
 
