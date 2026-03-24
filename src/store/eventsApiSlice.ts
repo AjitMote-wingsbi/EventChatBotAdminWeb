@@ -23,6 +23,15 @@ export interface EventUpdate {
   end_date?: string | null;
 }
 
+// event_id null → create, provided → update
+export interface EventUpsert {
+  event_id?: number | null;
+  name: string;
+  description?: string | null;
+  start_date: string;
+  end_date: string;
+}
+
 export interface ChatbotConfigOut {
   id: number;
   event_id: number;
@@ -49,6 +58,16 @@ export interface ChatbotConfigUpdate {
   chatboticon?: string | null;
   chatbotscript?: string | null;
   isactive?: boolean | null;
+}
+
+// event_id required; create if absent, update if exists
+export interface ChatbotConfigUpsert {
+  event_id: number;
+  bot_name?: string | null;
+  welcome_message?: string | null;
+  chatboticon?: string | null;
+  chatbotscript?: string | null;
+  isactive?: boolean;
 }
 
 export interface EventLanguageOut {
@@ -110,6 +129,10 @@ export const eventsApiSlice = createApi({
       query: ({ id, data }) => ({ url: `events/${id}`, method: 'PUT', data }),
       invalidatesTags: (_r, _e, { id }) => ['Events', { type: 'Events', id }],
     }),
+    upsertEvent: builder.mutation<EventOut, EventUpsert>({
+      query: (data) => ({ url: 'events/upsert', method: 'POST', data }),
+      invalidatesTags: (_r, _e, arg) => ['Events', ...(arg.event_id ? [{ type: 'Events' as const, id: arg.event_id }] : [])],
+    }),
     deleteEvent: builder.mutation<void, number>({
       query: (id) => ({ url: `events/${id}`, method: 'DELETE' }),
       invalidatesTags: ['Events'],
@@ -127,6 +150,10 @@ export const eventsApiSlice = createApi({
     updateChatbotConfig: builder.mutation<ChatbotConfigOut, { eventId: number; data: ChatbotConfigUpdate }>({
       query: ({ eventId, data }) => ({ url: `events/${eventId}/chatbot-config`, method: 'PUT', data }),
       invalidatesTags: (_r, _e, { eventId }) => [{ type: 'ChatbotConfig', id: eventId }],
+    }),
+    upsertChatbotConfig: builder.mutation<ChatbotConfigOut, ChatbotConfigUpsert>({
+      query: (data) => ({ url: 'events/chatbot-config/upsert', method: 'POST', data }),
+      invalidatesTags: (_r, _e, arg) => [{ type: 'ChatbotConfig', id: arg.event_id }],
     }),
 
     // Theme
@@ -160,10 +187,12 @@ export const {
   useGetEventQuery,
   useCreateEventMutation,
   useUpdateEventMutation,
+  useUpsertEventMutation,
   useDeleteEventMutation,
   useGetChatbotConfigQuery,
   useCreateChatbotConfigMutation,
   useUpdateChatbotConfigMutation,
+  useUpsertChatbotConfigMutation,
   useGetChatbotThemeQuery,
   useCreateChatbotThemeMutation,
   useUpdateChatbotThemeMutation,
