@@ -189,6 +189,7 @@ export default function EventDetail() {
     `<script src="${widgetBase}/chatbot-widget.js"><\/script>`,
     `<script>`,
     `  WiBiChatbot.init({`,
+    `    eventIdentifier: '${event.identifier}',`,
     `    position:       'bottom-right',`,
     `    theme:          'dark',`,
     `    autoOpen:       true,`,

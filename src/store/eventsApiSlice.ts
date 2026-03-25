@@ -4,9 +4,13 @@ import axiosBaseQuery from './axiosBaseQuery';
 export interface EventOut {
   id: number;
   name: string;
+  identifier: string;
   description: string | null;
   start_date: string;
   end_date: string;
+  isactive: boolean;
+  createddate: string | null;
+  modifieddate: string | null;
 }
 
 export interface EventCreate {
