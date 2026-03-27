@@ -4,6 +4,14 @@ FROM node:20-alpine AS builder
 # Set working directory
 WORKDIR /app
 
+# Declare VITE_ build args — each defaults to its own name as a runtime placeholder.
+# The built JS bundle will contain the placeholder string (e.g. "VITE_API_BASE_URL")
+# which gets swapped for the real value at container startup from Azure App Settings.
+ARG VITE_API_BASE_URL=VITE_API_BASE_URL
+ARG VITE_CHATBOT_WIDGET_URL=VITE_CHATBOT_WIDGET_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_CHATBOT_WIDGET_URL=$VITE_CHATBOT_WIDGET_URL
+
 # Copy dependency files
 COPY package.json package-lock.json ./
 
@@ -31,5 +39,6 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Expose port 80
 EXPOSE 80
 
-# Start Nginx server
-CMD ["nginx", "-g", "daemon off;"]
+# At startup, replace every VITE_* placeholder in the JS/HTML bundle with the actual
+# value from Azure App Settings, then start Nginx.
+CMD ["/bin/sh", "-c", "for var in $(printenv | grep '^VITE_' | cut -d= -f1); do value=$(printenv \"$var\"); find /usr/share/nginx/html -type f \\( -name '*.js' -o -name '*.html' \\) | xargs sed -i \"s|${var}|${value}|g\"; done && nginx -g 'daemon off;'"]
