@@ -183,7 +183,7 @@ export default function EventDetail() {
     setIsEditing(false);
   };
 
-  const widgetBase = (import.meta.env.VITE_CHATBOT_WIDGET_URL as string) ?? 'https://chatbotwidget.z10.web.core.windows.net';
+  const widgetBase = ((import.meta.env.VITE_CHATBOT_WIDGET_URL as string) ?? '').replace(/\/$/, '');
 
   const embedScript = [
     `<script src="${widgetBase}/chatbot-widget.js"><\/script>`,
@@ -192,6 +192,7 @@ export default function EventDetail() {
     `    eventIdentifier: '${event.identifier}',`,
     `    position:       'bottom-right',`,
     `    theme:          'dark',`,
+    `    basePath:       '${widgetBase}',`,
     `    autoOpen:       true,`,
     `    stdTypeId:      {{stdTypeId}},`,
     `    exbId:          {{exbId}},`,
@@ -517,8 +518,10 @@ export default function EventDetail() {
             <Typography variant="caption" sx={{ mb: 1, display: 'block', color: 'text.secondary' }}>
               Paste this snippet just before the closing <code>&lt;/body&gt;</code> tag.
             </Typography>
-            <Box sx={{ position: 'relative', bgcolor: (t) => t.palette.mode === 'dark' ? alpha('#000', 0.2) : '#f8fafc', border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 2, pr: 6, fontFamily: 'monospace', fontSize: '0.75rem', whiteSpace: 'pre', overflowX: 'auto' }}>
-              {embedScript}
+            <Box sx={{ position: 'relative' }}>
+              <Box sx={{ bgcolor: (t) => t.palette.mode === 'dark' ? alpha('#000', 0.2) : '#f8fafc', border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 2, pr: 6, fontFamily: 'monospace', fontSize: '0.75rem', whiteSpace: 'pre', overflowX: 'auto' }}>
+                {embedScript}
+              </Box>
               <Tooltip title={copiedType === 'script' ? 'Copied!' : 'Copy Code'} placement="top">
                 <IconButton size="small" onClick={() => handleCopy(embedScript, 'script')} sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'background.paper', boxShadow: 1 }}>
                   {copiedType === 'script' ? <CheckRoundedIcon color="success" fontSize="small" /> : <ContentCopyRoundedIcon fontSize="small" />}

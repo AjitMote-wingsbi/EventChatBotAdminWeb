@@ -4,7 +4,8 @@
       "Bash(npm install:*)",
       "Bash(del \"d:\\\\Ajit Mote Workspace\\\\WingsBi Workspace\\\\chatbotworkspace\\\\EventChatbot.Admin-main\\\\src\\\\services\\\\api.ts\")",
       "Bash(npx tsc:*)",
-      "Bash(ls \"d:\\\\Ajit Mote Workspace\\\\WingsBi Workspace\\\\chatbotworkspace\\\\EventChatbot.Admin-main\"/*.cjs)"
+      "Bash(ls \"d:\\\\Ajit Mote Workspace\\\\WingsBi Workspace\\\\chatbotworkspace\\\\EventChatbot.Admin-main\"/*.cjs)",
+      "Bash(xargs grep:*)"
     ],
     "additionalDirectories": [
       "d:\\Ajit Mote Workspace\\WingsBi Workspace\\chatbotworkspace\\EventChatbot.Admin-main"
