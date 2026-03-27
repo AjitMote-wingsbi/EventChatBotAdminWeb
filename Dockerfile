@@ -1,38 +1,35 @@
-FROM node:20-alpine AS builder
+# 1. Build Stage
+FROM node:18-alpine AS builder
 
+# Set working directory
 WORKDIR /app
 
-# Accept API URL as a build argument (for CI/CD build environments)
-ARG VITE_API_BASE_URL
-# Pass it to Vite build (defaults to a placeholder if not provided)
-ENV VITE_API_BASE_URL=${VITE_API_BASE_URL:-VITE_API_BASE_URL_PLACEHOLDER}
+# Copy dependency files
+COPY package.json package-lock.json ./
 
-# Copy package files and install dependencies
-COPY package*.json ./
-RUN npm install
+# Install dependencies using npm
+RUN npm ci
 
-# Copy source code and build
+# Copy the rest of the project (including public & src)
 COPY . .
+
+# Build the project (Vite outputs to 'dist')
 RUN npm run build
 
-# Production stage using Nginx
-FROM nginx:alpine
+# 2. Production Stage (Nginx)
+FROM nginx:alpine AS runner
 
-# Copy built assets from the builder stage
+# Remove default nginx static assets
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copy build output to Nginx html directory
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Replace the default Nginx configuration to support SPA routing
-RUN printf "server {\n\
-    listen 80;\n\
-    location / {\n\
-        root /usr/share/nginx/html;\n\
-        index index.html index.htm;\n\
-        try_files \$uri \$uri/ /index.html;\n\
-    }\n\
-}\n" > /etc/nginx/conf.d/default.conf
+# Copy custom nginx config for SPA fallback (optional but recommended)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Expose port 80
 EXPOSE 80
 
-# This startup command dynamically replaces the placeholder with the runtime environment variable.
-# It allows Azure App Service to set VITE_API_BASE_URL via App Settings without rebuilding the image.
-CMD ["/bin/sh", "-c", "find /usr/share/nginx/html -type f -name '*.js' -exec sed -i \"s|VITE_API_BASE_URL_PLACEHOLDER|${VITE_API_BASE_URL}|g\" {} + && nginx -g 'daemon off;'"]
+# Start Nginx server
+CMD ["nginx", "-g", "daemon off;"]
